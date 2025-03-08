@@ -1,0 +1,18 @@
+Gatito Door Project Brainstorming
+I'm thinking of having the door sense when the cat either enters or leaves the house.
+- The door starts closed so that nothing from the outside can enter
+	- A web server can tell me if the door is closed or not
+- When he exits, the door will stay unlocked for when he comes back
+	- I'll be notified that it's unlocked
+- Once he enters, the door closes from the inside to prevent anything from following him in.
+	- I'll be notified that it's locked
+- I'll be able to unlock and lock using buttons on a web server
+	- HTML experience :D
+	- Has to be connected to WiFi ofc
+- Not sure how I'll install on the door but I'll figure that out later
+- I'm thinking of using a magnetic sensor that detects when the cat enters or leaves (has to be synced with whether he's in or out (might not work tbh))
+- Parts needed
+	- Another servo motor (2 if the 9g one sucks)
+	- Magnetic sensor (Hall effect sensor)
+		- Says it's already built in but might use external one
+	
