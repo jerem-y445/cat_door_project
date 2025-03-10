@@ -48,18 +48,18 @@ void loop() {
         //delay(1000);
         isConnected = false;
     }*/
-    if (hallRead() > 1 && !isOutside) {
-        for (pos = 0; pos <= 180; pos++) {
-            servo1.write(pos);
-            delay(10);
-            servo2.write(180 - pos);
-            delay(10);
+    
+    while(oneSweep < 1) {
+        for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+            // in steps of 1 degree
+            myServo.write(pos);    // tell servo to go to position in variable 'pos'
+            delay(15);             // waits 15ms for the servo to reach the position
         }
-        Serial.println("Gato is inside; door is locked");
-    }
-
-    if (hallRead() < 1) {
-        Serial.println("Gato is outside; door is unlocked");
+        for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+            myServo.write(pos);    // tell servo to go to position in variable 'pos'
+            delay(15);
+        }
+        oneSweep++;
     }
 
 }
