@@ -34,6 +34,7 @@ void setup(){
 
 //bool isConnected = false;
 bool isOutside = false;
+int oneSweep = 0;
 
 void loop() {
     /*if (WiFi.status() == WL_CONNECTED && !isConnected) {
@@ -48,18 +49,33 @@ void loop() {
         //delay(1000);
         isConnected = false;
     }*/
-    
-    while(oneSweep < 1) {
-        for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-            // in steps of 1 degree
-            myServo.write(pos);    // tell servo to go to position in variable 'pos'
-            delay(15);             // waits 15ms for the servo to reach the position
+    /*if (hallRead() >= 1 && !isOutside) {
+        for (pos=0; pos < 180; pos++) {
+            servo1.write(pos);
+            servo2.write(180-pos);
         }
-        for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-            myServo.write(pos);    // tell servo to go to position in variable 'pos'
-            delay(15);
-        }
-        oneSweep++;
+        Serial.println("Gato is outside; gato door is unlocked.");
+        isOutside = true;
     }
 
+    if (hallRead() <= 1 && isOutside) {
+        for (pos=180; pos > 0; pos--) {
+            servo1.write(pos);
+            servo2.write(180-pos);
+        }
+        Serial.println("Gato is inside; gato door is locked (for now)...");
+        isOutside = false;
+    }*/
+    // Serial.println(hallRead());
+    while(1) {
+        for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+            // in steps of 1 degree
+            servo1.write(pos);    // tell servo to go to position in variable 'pos'
+            delay(100);             // waits 15ms for the servo to reach the position
+        }
+        for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+            servo1.write(pos);    // tell servo to go to position in variable 'pos'
+            delay(100);
+        }
+    }
 }
