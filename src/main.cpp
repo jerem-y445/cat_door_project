@@ -11,7 +11,7 @@ int pos = 0;
 int servoPin1 = 18;
 int servoPin2 = 12;
 
-void setup(){
+void setup() {
     
     /*Serial.begin(921600);
     pinMode(LED_BUILTIN, OUTPUT);
@@ -37,6 +37,8 @@ bool isOutside = false;
 int oneSweep = 0;
 
 void loop() {
+
+    // WiFi Section
     /*if (WiFi.status() == WL_CONNECTED && !isConnected) {
         Serial.println("Connected!");
         digitalWrite(LED_BUILTIN, HIGH);
@@ -67,6 +69,8 @@ void loop() {
         isOutside = false;
     }*/
     // Serial.println(hallRead());
+
+    // Simple Servo Testing
     while(1) {
         for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
             // in steps of 1 degree
@@ -78,4 +82,7 @@ void loop() {
             delay(100);
         }
     }
+
+    // Detection of Cat
+    //  will use 
 }
