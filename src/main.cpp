@@ -1,88 +1,65 @@
-#include "Arduino.h"
-#include <WiFi.h>
-#include <ESP32Servo.h>
-#define LED_BUILTIN 2
+#include <Arduino.h>
+#include <HardwareSerial.h>
+#include <PN532_HSU.h>
+#include <PN532.h>
 
-const char* ssid = "<insert wifi name here>";
-const char* password = "<insert wifi password here>";
+// Use UART2 on ESP32: GPIO 16 (RX), GPIO 17 (TX)
+HardwareSerial PNSerial(2); // UART2 instance
+PN532_HSU pn532hsu(PNSerial);
+PN532 nfc(pn532hsu);
 
-Servo servo1, servo2;
-int pos = 0;
-int servoPin1 = 18;
-int servoPin2 = 12;
+// Tag IDs 
+String tagID1 = "174.247.9.5"; // Card ID
+String tagID2 = "151.246.176.1"; // Fob ID
 
 void setup() {
-    
-    /*Serial.begin(921600);
-    pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200); // Monitor2
+  delay(1000); // Give time to connect to Serial
+  Serial.println("Starting PN532 Test...");
 
-    WiFi.begin(ssid, password);
+  // Start UART2 for PN532 communication
+  PNSerial.begin(115200, SERIAL_8N1, 16, 17); // RX=16, TX=17
 
-    Serial.println("Starting");*/
+  nfc.begin();
 
-    // Servo timer allocations
-    ESP32PWM::allocateTimer(0);
-	ESP32PWM::allocateTimer(1);
-	ESP32PWM::allocateTimer(2);
-	ESP32PWM::allocateTimer(3);
-	servo1.setPeriodHertz(50);
-	servo1.attach(servoPin1, 500, 2400);
-    servo2.setPeriodHertz(50);
-	servo2.attach(servoPin2, 500, 2400);
+  uint32_t versiondata = nfc.getFirmwareVersion();
+  if (!versiondata) {
+    Serial.println("Didn't find PN53x module. Check wiring and interface.");
+    while (1); // Halt
+  }
 
+  // Successfully connected
+  Serial.print("Found chip PN5");
+  Serial.println((versiondata >> 24) & 0xFF, HEX);
+  Serial.print("Firmware Version: ");
+  Serial.print((versiondata >> 16) & 0xFF, DEC);
+  Serial.print(".");
+  Serial.println((versiondata >> 8) & 0xFF, DEC);
+
+  nfc.SAMConfig();
+  Serial.println("PN532 initialized and ready.");
 }
 
-//bool isConnected = false;
-bool isOutside = false;
-int oneSweep = 0;
-
 void loop() {
+  Serial.println("Waiting for an ISO14443A card...");
+  uint8_t success;
+  uint8_t uid[] = {0, 0, 0, 0, 0, 0, 0};
+  uint8_t uidLength;
 
-    // WiFi Section
-    /*if (WiFi.status() == WL_CONNECTED && !isConnected) {
-        Serial.println("Connected!");
-        digitalWrite(LED_BUILTIN, HIGH);
-        isConnected = true;
+  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+
+  if (success) {
+    Serial.println("Found a card!");
+    Serial.print("UID Length: "); Serial.print(uidLength, DEC); Serial.println(" bytes");
+    Serial.print("UID Value: ");
+    for (uint8_t i = 0; i < uidLength; i++) {
+      Serial.print(uid[i], HEX);
+      if (i != uidLength - 1) Serial.print(":");
     }
-
-    if (WiFi.status() != WL_CONNECTED) {
-        //Serial.println(".");
-        //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-        //delay(1000);
-        isConnected = false;
-    }*/
-    /*if (hallRead() >= 1 && !isOutside) {
-        for (pos=0; pos < 180; pos++) {
-            servo1.write(pos);
-            servo2.write(180-pos);
-        }
-        Serial.println("Gato is outside; gato door is unlocked.");
-        isOutside = true;
-    }
-
-    if (hallRead() <= 1 && isOutside) {
-        for (pos=180; pos > 0; pos--) {
-            servo1.write(pos);
-            servo2.write(180-pos);
-        }
-        Serial.println("Gato is inside; gato door is locked (for now)...");
-        isOutside = false;
-    }*/
-    // Serial.println(hallRead());
-
-    // Simple Servo Testing
-    while(1) {
-        for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-            // in steps of 1 degree
-            servo1.write(pos);    // tell servo to go to position in variable 'pos'
-            delay(100);             // waits 15ms for the servo to reach the position
-        }
-        for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-            servo1.write(pos);    // tell servo to go to position in variable 'pos'
-            delay(100);
-        }
-    }
-
-    // Detection of Cat
-    //  will use 
+    Serial.println();
+    delay(2000); // Wait before next read
+  } else {
+    Serial.println("No card detected.");
+    delay(1000);
+  }
 }
